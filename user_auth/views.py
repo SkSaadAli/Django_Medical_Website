@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.models import User
 from user_auth.decorators import patient_required, doctor_required
 from django.http import HttpResponse
-
+from django.contrib.auth.decorators import login_required
 
 
 # utility functions
@@ -75,6 +75,7 @@ def user_login(request):
                 return redirect('doctor_dashboard')
     return render(request, 'user_auth/login.html')
 
+@login_required(login_url='login')
 def user_logout(request):
     logout(request)
     return redirect('login')
