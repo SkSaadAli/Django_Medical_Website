@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Django Project</title>
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,400i|PT+Serif:700" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'dist/css/style.css' %}">
+    <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
+</head>
+<body class="is-boxed has-animations">
+    <div class="body-wrap boxed-container">
+        <header class="site-header">
+            <div class="container">
+                <div class="site-header-inner">
+                    <div class="brand header-brand">
+                        <h1 class="m-0">
+                        </h1>
+                    </div>
+                    <ul class="header-links list-reset m-0">
+                        <li>
+                            
+                            <a href="{% url 'login' %}">{% if not user.is_authenticated %}Login{% else %} Dashboard{% endif %}</a>
+                        </li>
+                        <li>
+                            {% if not user.is_authenticated %}
+                            <a class="button button-sm button-shadow" href="{% url 'signup' %}">Signup</a>
+                            {% else %}
+                            <a class="button button-sm button-shadow" href="{% url 'logout' %}">Logout</a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero text-light text-center">
+                <div class="container-sm">
+                    <div class="hero-inner">
+                        <h1 class="hero-title h2-mobile mt-0 is-revealing">Django project for Mysql DB</h1>
+                        <p class="hero-paragraph is-revealing">Welcome to Django task for enabling signup and login for different types of users. On login redirect users to their respective dashboards.</p>
+                        
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <div class="container">
+                <div class="site-footer-inner">
+                </div>
+            </div>
+        </footer>
+    </div>
+    <script src="{% static 'dist/js/main.min.js' %}"></script>
+</body>
+</html>
