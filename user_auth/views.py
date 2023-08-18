@@ -16,9 +16,9 @@ def check_confirm_password(form):
 
 def redirect_to_dashboard(user):
     if user.profile_type == 'Patient' or user.profile_type == 'patient':
-        return 'patient_dashboard'  # Replace with your patient dashboard URL name
+        return 'patient_dashboard'  
     elif user.profile_type == 'Doctor' or user.profile_type == 'doctor':
-        return 'doctor_dashboard'  # Replace with your doctor dashboard URL name
+        return 'doctor_dashboard'  
 
 # all the urls
 
