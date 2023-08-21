@@ -91,7 +91,7 @@ def self_blogs(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
 
     blogs = Blog.objects.filter(
-        Q(author__username__icontains=request.user)
+        Q(author__username=request.user)
     )
     p = Paginator(blogs, 4)
 
