@@ -31,9 +31,7 @@ def redirect_to_dashboard(user):
 @login_required(login_url='login')
 def home(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
-    all_ = Blog.objects.all()
     blogs = Blog.objects.filter(
-        Q(category__name__icontains=q) &
         (Q(author=request.user) | Q(draft=False))
     )
     p = Paginator(blogs, 4)
@@ -61,10 +59,10 @@ def home(request):
 @login_required(login_url='login')
 def category(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
-    all_ = Blog.objects.all()
+
 
     blogs = Blog.objects.filter(
-        Q(category__name__icontains=q) &
+        Q(category__name=q) &
         (Q(author=request.user) | Q(draft=False))
     )
 
@@ -91,9 +89,8 @@ def category(request):
 @doctor_required
 def self_blogs(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
-    all_ = Blog.objects.all()
+
     blogs = Blog.objects.filter(
-        Q(category__name__icontains=q) &
         Q(author__username__icontains=request.user)
     )
     p = Paginator(blogs, 4)
