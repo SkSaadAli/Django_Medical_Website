@@ -1,60 +1,57 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
+<html class="no-js" lang="en-US">
+
+<!-- this html extends to every other html in this website -->
+
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Django Project</title>
-    <link href="https://fonts.googleapis.com/css?family=Lato:400,400i|PT+Serif:700" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'dist/css/style.css' %}">
-    <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Read Some Poems</title>
+	<link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico' %}">
+
+	</style>
+
+	<!-- loading css and js from static folders -->
+
+	<link rel='stylesheet' id='activello-bootstrap-css'
+		href="{% static 'css/min_css.css' %}"
+		type='text/css' media='all' />
+
+	<link crossorigin="anonymous" rel='stylesheet' id='activello-fonts-css'
+		href="{% static 'css/google_fonts.css' %}"
+		type='text/css' media='all' />
+
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+
+	<link rel='stylesheet' id='activello-style-css'
+		href="{% static 'css/activello.css' %}"
+		type='text/css' media='all' />
+	<script type='text/javascript'
+		src="{% static 'js/min.js' %}"
+		id='jquery-core-js'></script>
+
+	<script src="{% static 'js/bootstrap_min.js' %}"></script>
+
+	<style type="text/css">
+		#social li {
+			display: inline-block;
+		}
+
+		#social li,
+		#social ul {
+			border: 0 !important;
+			list-style: none;
+			padding-left: 0;
+			text-align: center;
+		}
+	</style>
 </head>
-<body class="is-boxed has-animations">
-    <div class="body-wrap boxed-container">
-        <header class="site-header">
-            <div class="container">
-                <div class="site-header-inner">
-                    <div class="brand header-brand">
-                        <h1 class="m-0">
-                        </h1>
-                    </div>
-                    <ul class="header-links list-reset m-0">
-                        <li>
-                            
-                            <a href="{% url 'login' %}">{% if not user.is_authenticated %}Login{% else %} Dashboard{% endif %}</a>
-                        </li>
-                        <li>
-                            {% if not user.is_authenticated %}
-                            <a class="button button-sm button-shadow" href="{% url 'signup' %}">Signup</a>
-                            {% else %}
-                            <a class="button button-sm button-shadow" href="{% url 'logout' %}">Logout</a>
-                            {% endif %}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </header>
 
-        <main>
-            <section class="hero text-light text-center">
-                <div class="container-sm">
-                    <div class="hero-inner">
-                        <h1 class="hero-title h2-mobile mt-0 is-revealing">Django project for Mysql DB</h1>
-                        <p class="hero-paragraph is-revealing">Welcome to Django task for enabling signup and login for different types of users. On login redirect users to their respective dashboards.</p>
-                        
-                    </div>
-                </div>
-            </section>
-        </main>
+{% block content %}
 
-        <footer class="site-footer">
-            <div class="container">
-                <div class="site-footer-inner">
-                </div>
-            </div>
-        </footer>
-    </div>
-    <script src="{% static 'dist/js/main.min.js' %}"></script>
+{% endblock %}
+
+{% include 'footer.html' %}
 </body>
+
 </html>

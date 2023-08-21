@@ -1,5 +1,5 @@
 from django import forms
-from .models import User
+from .models import User, Blog
 
 class UserSignupForm(forms.ModelForm):
     password_confirm = forms.CharField(widget=forms.PasswordInput)
@@ -32,9 +32,6 @@ class UserSignupForm(forms.ModelForm):
         self.fields['city'].widget.attrs.update({
             'placeholder':'City'
         })
-        # self.fields['state'].widget.attrs.update({
-        #     'placeholder':'State'
-        # })
         self.fields['pincode'].widget.attrs.update({
             'placeholder':'Pincode'
         })
@@ -47,5 +44,11 @@ class UserSignupForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'profile_type', 'profile_picture', 'username', 'email', 'password', 'password_confirm', 'address_line1', 'city', 'pincode']
+
+class BlogForm(forms.ModelForm):
+
+    class Meta:
+        model = Blog
+        fields = [ 'category', 'name', 'blog_picture', 'content','draft']
 
 

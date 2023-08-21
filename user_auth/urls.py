@@ -7,6 +7,10 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('patient/', views.patient_dashboard, name='patient_dashboard'),
     path('doctor/', views.doctor_dashboard, name='doctor_dashboard'),
-    # path('profile_pic/<str:username>/', views.profile_pic_view, name='profile_pic_view'),
-    path('',views.home, name='home')
+    path('create/', views.create_blog, name='create_blog'),
+    path('update/<str:slug>', views.update_blog, name= 'update_blog'),
+    path('blog_detail/<str:slug>', views.blog_detail, name = 'blog_detail'),
+    path('',views.home, name='home'),
+    path('category', views.category, name='category'),
+    path('self_blog', views.self_blogs, name = 'self_blog')
 ]
