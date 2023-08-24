@@ -12,5 +12,12 @@ urlpatterns = [
     path('blog_detail/<str:slug>', views.blog_detail, name = 'blog_detail'),
     path('',views.home, name='home'),
     path('category', views.category, name='category'),
-    path('self_blog', views.self_blogs, name = 'self_blog')
+    path('self_blog', views.self_blogs, name = 'self_blog'),
+    # path ('event', views.events, name= 'event'),
+    path('book/<str:slug>',views.booking_view,name='book'),
+    path('A_detail/<str:slug>',views.A_detail, name='A_detail'),
+    path('doc',views.list_doctors,name='doc'),
+    path('appointments', views.appointment, name= 'appointment'),
+    path('get_available_slots/', views.get_available_slots,name='available')
+    # path('appointment',views.AD,name= 'A_detail')
 ]
