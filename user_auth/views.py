@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from .forms import UserSignupForm, BlogForm
 from django.contrib.auth.decorators import permission_required
@@ -240,3 +240,171 @@ def update_blog(request, slug):
     context = {'form': form, 'blog': blog,
                'categorys': categorys, 'page': page}
     return render(request, 'user_auth/create_blog.html', context)
+
+    
+
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+
+def create_google_calendar_event(appointment):
+    # Load OAuth 2.0 credentials
+    credentials = service_account.Credentials.from_service_account_file(
+        'user_auth/credentials.json',
+        scopes=['https://www.googleapis.com/auth/calendar']
+    )
+
+    # Create a Google Calendar API service
+    service = build('calendar', 'v3', credentials=credentials)
+    
+    event_end_datetime = datetime.datetime.combine(appointment.chosen_date, appointment.end_time)
+    event_end_datetime_str = event_end_datetime.strftime('%Y-%m-%dT%H:%M:%S')
+
+    event_start_datetime = datetime.datetime.combine(appointment.chosen_date, appointment.chosen_time)
+    event_start_datetime_str = event_start_datetime.strftime('%Y-%m-%dT%H:%M:%S')
+    # Define event details
+    event = {
+        'summary': f'Appointment with Dr {appointment.doctor.first_name} {appointment.doctor.last_name} and Patient {appointment.patient.first_name} {appointment.patient.last_name}',
+        'description': 'Appointment with Dr. {}'.format(appointment.doctor),
+        'start': {
+            'dateTime': event_start_datetime_str,
+            'timeZone': 'IST',
+        },
+        'end': {
+            'dateTime': event_end_datetime_str,
+            'timeZone': 'IST',
+        }
+        # 'attendees': [
+        #     {'email': appointment.doctor.email},
+        #     {'email': appointment.patient.email},
+        # ],
+    }
+
+    # Create the event
+    event = service.events().insert(calendarId='7774dd6c467faccb21163ad77f887fda5477972e0ad68a7e1365a71a68cc5a84@group.calendar.google.com', body=event).execute()
+    if event.get('id'):
+        appointment.google_url = event.get("htmlLink")
+        return False
+    return True
+
+
+
+
+
+from .forms import BookingForm
+import datetime
+
+def booking_view(request, slug):
+    doctor = User.objects.get(id=slug)
+    
+    if request.method == 'POST':
+        form = BookingForm(doctor, request.POST)
+        if form.is_valid():
+            
+            chosen_date = form.cleaned_data['chosen_date']
+            chosen_time = form.cleaned_data['chosen_time']
+
+
+            booked_appointments = Appointment.objects.filter(
+            doctor=doctor,
+            chosen_date=chosen_date,
+            chosen_time=chosen_time
+            )
+            if booked_appointments:
+                form = BookingForm(doctor)
+                return render(request, 'booking', {'form': form, 'doctor': doctor})
+
+            slot_duration = datetime.datetime.strptime('00:45', '%H:%M')
+            end_datetime = datetime.datetime.combine(chosen_date, chosen_time) + datetime.timedelta(minutes=45)
+            end_time = end_datetime
+
+            appointment = form.save(commit=False)
+            appointment.doctor = doctor
+            appointment.patient = request.user
+            appointment.end_time = end_time.time()
+            if create_google_calendar_event(appointment):
+                form = BookingForm(doctor)
+
+                return render(request, 'booking.html', {'form': form, 'doctor': doctor})
+                
+            appointment.save()
+            
+            # Redirect or show a success message
+            return redirect( 'A_detail', slug = appointment.id)
+    else:
+        form = BookingForm(doctor)
+
+    return render(request, 'booking.html', {'form': form, 'doctor': doctor})
+
+
+from user_auth.models import User
+
+@patient_required
+def list_doctors(request):
+    # Retrieve all doctors from the database
+    doctors = User.objects.filter(profile_type='doctor')
+    
+    # Render a template with the list of doctors
+    return render(request, 'list_doctors.html', {'doctors': doctors})
+
+
+from .models import Appointment
+from django.http import JsonResponse
+
+def get_available_slots(request):
+    selected_date = request.GET.get('date')  
+    print(request.GET.get('doctor_id'))
+    doctor = User.objects.get(id=request.GET.get('doctor_id'))
+
+    available_slots = calculate_available_slots(selected_date,doctor)
+    return JsonResponse({'slots': available_slots})
+
+def calculate_available_slots(selected_date, doctor):
+        chosen_date = selected_date
+
+        # Generate all slots for the working hours (9 am to 10 pm) with a 45-minute interval
+        available_slots = []
+        current_time = datetime.time(9, 0)  # Start with 9:00 AM
+        end_time = datetime.time(22, 0)    # End at 10:00 PM
+
+        while current_time < end_time:
+
+            available_slots.append(current_time)
+            current_time = datetime.datetime.combine(datetime.date.today(), current_time)
+            current_time += datetime.timedelta(minutes=45)
+            current_time = current_time.time()
+
+
+
+        booked_appointments = Appointment.objects.filter(
+            doctor=doctor,
+            chosen_date=chosen_date
+        ).values_list('chosen_time', flat=True)
+
+        # Exclude booked slots from available slots
+        available_slots = [(slot) for slot in available_slots if slot not in booked_appointments]
+
+        return available_slots
+
+
+def A_detail(request,slug):
+    appointment = Appointment.objects.get(id=slug)
+
+    if request.user != appointment.doctor and request.user != appointment.patient:
+        return HttpResponse('You are not allowed here')
+
+    return render(request,'A_detail.html',{ 'appointment' : appointment})
+
+
+@login_required(login_url='login')
+def appointment(request):
+    if request.user.profile_type == 'patient':
+        appointments = Appointment.objects.filter(
+            Q(patient=request.user)
+        )
+    
+    else:
+        appointments = Appointment.objects.filter(
+            Q(doctor=request.user)
+        )
+
+    return render(request, 'list_appointments.html',{'appointments':appointments})
