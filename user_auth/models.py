@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import datetime
 
 # Custom User Model
 class User(AbstractUser):
@@ -17,6 +18,8 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
 
 # Category Model
 class Category(models.Model):
@@ -46,3 +49,17 @@ class Blog(models.Model):
 
         
 
+
+class Appointment(models.Model):
+    patient = models.ForeignKey(User, on_delete=models.CASCADE)
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='doctor_appointments')
+    chosen_date = models.DateField(default=datetime.date.today)
+    chosen_time = models.TimeField(default=datetime.time(12, 0))
+    end_time = models.TimeField(default=datetime.time(12, 45)) 
+    speciality = (
+        ('Neuro', 'Neuro'),
+        ('Cardio', 'Cardio'),
+        ('Pediatrics', 'Pediatrics'),
+    )
+    google_url = models.URLField(max_length=300)
+    required_speciality = models.CharField(max_length=15, choices=speciality, default="Neuro")
