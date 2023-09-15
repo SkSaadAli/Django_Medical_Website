@@ -297,7 +297,7 @@ def booking_view(request, slug):
     doctor = User.objects.get(id=slug)
     
     if request.method == 'POST':
-        form = BookingForm(doctor, request.POST)
+        form = BookingForm(doctor,request.user, request.POST)
         if form.is_valid():
             
             chosen_date = form.cleaned_data['chosen_date']
@@ -322,7 +322,7 @@ def booking_view(request, slug):
             appointment.patient = request.user
             appointment.end_time = end_time.time()
             if create_google_calendar_event(appointment):
-                form = BookingForm(doctor)
+                form = BookingForm(doctor,request.user)
 
                 return render(request, 'booking.html', {'form': form, 'doctor': doctor})
                 
@@ -331,7 +331,7 @@ def booking_view(request, slug):
             # Redirect or show a success message
             return redirect( 'A_detail', slug = appointment.id)
     else:
-        form = BookingForm(doctor)
+        form = BookingForm(doctor,request.user)
 
     return render(request, 'booking.html', {'form': form, 'doctor': doctor})
 
@@ -352,13 +352,13 @@ from django.http import JsonResponse
 
 def get_available_slots(request):
     selected_date = request.GET.get('date')  
-    print(request.GET.get('doctor_id'))
+    # print(request.GET.get('doctor_id'))
     doctor = User.objects.get(id=request.GET.get('doctor_id'))
 
-    available_slots = calculate_available_slots(selected_date,doctor)
+    available_slots = calculate_available_slots(selected_date,doctor,request.user)
     return JsonResponse({'slots': available_slots})
 
-def calculate_available_slots(selected_date, doctor):
+def calculate_available_slots(selected_date, doctor,paitent):
         chosen_date = selected_date
 
         # Generate all slots for the working hours (9 am to 10 pm) with a 45-minute interval
@@ -374,15 +374,14 @@ def calculate_available_slots(selected_date, doctor):
             current_time = current_time.time()
 
 
-
         booked_appointments = Appointment.objects.filter(
-            doctor=doctor,
+            Q(patient=paitent) | Q(doctor=doctor),
             chosen_date=chosen_date
         ).values_list('chosen_time', flat=True)
 
+        print(booked_appointments)
         # Exclude booked slots from available slots
         available_slots = [(slot) for slot in available_slots if slot not in booked_appointments]
-
         return available_slots
 
 
@@ -400,7 +399,7 @@ def appointment(request):
     if request.user.profile_type == 'patient':
         appointments = Appointment.objects.filter(
             Q(patient=request.user)
-        )
+        ).order_by('-id')[:30]
     
     else:
         appointments = Appointment.objects.filter(

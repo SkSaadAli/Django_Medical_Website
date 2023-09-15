@@ -1,5 +1,6 @@
 from django import forms
 from .models import User, Blog, Appointment
+from django.db.models import Q
 # from datetime import date, datetime, time, timedelta
 
 
@@ -62,22 +63,25 @@ from .models import Appointment
 # from datetime import time, timedelta, datetime
 import datetime
 
+from django.utils.timezone import now
+
 class BookingForm(forms.ModelForm):
     class Meta:
         model = Appointment
         fields = ['chosen_date', 'chosen_time','required_speciality']
 
-    def __init__(self, doctor, *args, **kwargs):
+    def __init__(self, doctor, paitent, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.paitent = paitent
         self.doctor = doctor
-        # self.fields['chosen_date'].widget.attrs['readonly'] = True  # Make the date field readonly
-        # self.fields['chosen_date'].widget = forms.DateInput(attrs={'type': 'date'})
-        self.fields['chosen_date'].widget = forms.DateInput(attrs={'type': 'date', 'id': 'id_chosen_date'})
-
+        min_date = (now()+datetime.timedelta(days=1)).strftime('%Y-%m-%d')
+        max_date = (now()+datetime.timedelta(days=31)).strftime('%Y-%m-%d')
+        self.fields['chosen_date'].widget = forms.DateInput(attrs={'type': 'date', 'id': 'id_chosen_date','min': min_date,'max':max_date})
+        self.fields['chosen_date'].initial = min_date
         self.fields['chosen_time'].widget = forms.Select(choices=self.get_available_slots())
 
     def get_available_slots(self):
-        chosen_date = self.data.get('chosen_date') or datetime.date.today()
+        chosen_date = self.data.get('chosen_date') or (datetime.date.today()+ datetime.timedelta(days=1))
 
         # Generate all slots for the working hours (9 am to 10 pm) with a 45-minute interval
         available_slots = []
@@ -107,10 +111,15 @@ class BookingForm(forms.ModelForm):
 
 
         # Fetch booked appointments for the chosen date
+        # booked_appointments = Appointment.objects.filter(
+        #     doctor=self.doctor,
+        #     chosen_date=chosen_date
+        # ).values_list('chosen_time', flat=True)
         booked_appointments = Appointment.objects.filter(
-            doctor=self.doctor,
+            Q(patient=self.paitent) | Q(doctor=self.doctor),
             chosen_date=chosen_date
         ).values_list('chosen_time', flat=True)
+        print(booked_appointments)
 
         # Exclude booked slots from available slots
         available_slots = [(slot.strftime('%H:%M:%S'), slot.strftime('%H:%M:%S')) for slot in available_slots if slot not in booked_appointments]

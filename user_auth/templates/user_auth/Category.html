@@ -50,6 +50,7 @@
 															>{{blog.author}}</a></span>
 												</div>
 											</header>
+											<center>
                                             {% if blog.blog_picture %}
                                             <div style="width: 330px; height: 220px; overflow: hidden;">
                                                
@@ -59,6 +60,7 @@
                                             {% else %}
                                             <img width="330" height="270" src="{% static 'user_auth/default_img/default-blog-image.png' %}" class="single-featured wp-post-image" alt="" decoding="async" loading="lazy">
                                             {% endif %}
+										</center>
 											<p>
 												<center>{{blog|linebreaksbr}} [...]<br><br>
 													<div style="    border-left: 2px solid #696969;

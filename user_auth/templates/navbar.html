@@ -54,12 +54,17 @@
                             <li id="menu-item-1696"
                                     class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1813"><a
                                         title="DashBoard" href="{% url 'patient_dashboard' %}">DashBoard</a></li>
+                                        <li id="menu-item-1696"
+                                        class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1813"><a
+                                            title="Home" href="{% url 'doc' %}">Book Appointments</a></li>
                             {% endif %}
                             {% else %}
 
                             <li id="menu-item-1696"
                                 class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1813"><a
                                     title="login" href="{% url 'login' %}">login</a></li>
+                            
+
 
                             {% endif %}
                         </ul>
