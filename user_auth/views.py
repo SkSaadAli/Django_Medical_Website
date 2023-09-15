@@ -404,6 +404,6 @@ def appointment(request):
     else:
         appointments = Appointment.objects.filter(
             Q(doctor=request.user)
-        )
+        ).order_by('-id')[:30]
 
     return render(request, 'list_appointments.html',{'appointments':appointments})
